@@ -16,6 +16,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
       - name: Build with Gradle
         run: |
           pwd
