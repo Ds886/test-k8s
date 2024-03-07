@@ -66,6 +66,8 @@ jobs:
           mv app/build/jib-image.tar app/build/helloServiceDocker.tar
 
   upload:
+    needs:
+      - package
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
