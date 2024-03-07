@@ -121,9 +121,9 @@ jobs:
           mv app/build/jib-image.tar app/build/helloServiceDocker.tar
 
       - uses: actions/upload-artifact@v4
-        overwrite: true
         with:
           name: my-artifact
+          overwrite: true
           path: |
             java-hello-service/app/build/jib-image.tar app/build/helloServiceDocker.tar
   upload:
