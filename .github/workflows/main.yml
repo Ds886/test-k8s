@@ -1,37 +1,40 @@
 name: default
 
-on:
-  push:
-    branches:
-    - '*'
+on: [push]
 
-steps:
-  - uses: actions/checkout@v4
-  - name: Initial setup
-    uses: actions/setup-java@v4A
-    with:
-      java-version: '17'
-      distribution: 'temurin'
-      architecture: x64
+jobs:
+  build:
+    runs-on:  ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initial setup
+        uses: actions/setup-java@v4A
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          architecture: x64
 
-  - name: Setup Gradle
-    uses: gradle/actions/setup-gradle@v3
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
-  - name: Build with Gradle
-    run: ./gradlew build
+      - name: Build with Gradle
+        run: ./gradlew build
 
-  - name: Build with Gradle
-    run: |
-      cd java-hello-service 
-      ./gradlew  clean build distTar jibBuildTar
-      mv app/build/distributions/app.tar app/build/distributions/helloService.tar
-      mv app/build/jib-image.tar app/build/helloServiceDocker.tar
+      - name: Build with Gradle
+        run: |
+          cd java-hello-service 
+          ./gradlew  clean build distTar jibBuildTar
+          mv app/build/distributions/app.tar app/build/distributions/helloService.tar
+          mv app/build/jib-image.tar app/build/helloServiceDocker.tar
 
-  - name: Upload artifacts
-    with:
-      name: dist-without-markdown
-      path: |
-        java-hello-service/app/build/helloServiceDocker.tar
-        java-hello-service/app/build/distributions/app.tar
+  upload:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Upload artifacts
+        with:
+          name: dist-without-markdown
+          path: |
+            java-hello-service/app/build/helloServiceDocker.tar
+            java-hello-service/app/build/distributions/app.tar
 
     
