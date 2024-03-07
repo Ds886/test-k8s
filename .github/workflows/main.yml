@@ -7,7 +7,7 @@ jobs:
     runs-on:  ubuntu-latest
     steps:
       - name: Initial setup
-        uses: actions/setup-java@v4A
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
