@@ -125,7 +125,7 @@ jobs:
           name: my-artifact
           overwrite: true
           path: |
-            app/build/helloServiceDocker.tar
+            java-hello-service/app/build/helloServiceDocker.tar
   upload:
     needs:
       - package_tar
@@ -142,6 +142,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: github.ref
           files: |
             java-hello-service/app/build/*.tar
             java-hello-service/app/build/*.jar
