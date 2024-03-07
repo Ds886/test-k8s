@@ -110,11 +110,13 @@ jobs:
             java-hello-service/app/build/*.jar
           merge-multiple: true
 
-      - uses: actions/upload-artifact@v4
-        name: Upload artifacts
+      - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          name: dist-without-markdown
-          path: |
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
             java-hello-service/app/build/helloServiceDocker.tar
             java-hello-service/app/build/distributions/app.tar
 
