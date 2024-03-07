@@ -18,6 +18,8 @@ jobs:
 
       - name: Build with Gradle
         run: |
+          pwd
+          ls
           cd java-hello-service
           ./gradlew  clean build
 
