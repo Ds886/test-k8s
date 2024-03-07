@@ -6,7 +6,6 @@ jobs:
   build:
     runs-on:  ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - name: Initial setup
         uses: actions/setup-java@v4A
         with:
@@ -30,7 +29,8 @@ jobs:
   upload:
     runs-on: "ubuntu-latest"
     steps:
-      - name: Upload artifacts
+      - uses: actions/checkout@v4
+        name: Upload artifacts
         with:
           name: dist-without-markdown
           path: |
