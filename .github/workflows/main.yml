@@ -1,3 +1,10 @@
+name: default
+
+on:
+  push:
+    branches:
+    - '*'
+
 steps:
   - uses: actions/checkout@v4
   - name: Initial setup

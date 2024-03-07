@@ -37,15 +37,15 @@ ext {
     dockerVersion = project.hasProperty('version') ? project.version : 'latest'
 }
 
-jib {
-    to {
-        image = 'docker.io/myhelloworld/helloService'
-        version = dockerVersion
-    }
-    container {
-        format = 'tar'
-    }
-}
+// jib {
+//     to {
+//         image = 'docker.io/myhelloworld/helloService'
+//         version = dockerVersion
+//     }
+//     container {
+//         format = 'tar'
+//     }
+// }
 
 application {
     // Define the main class for the application.
