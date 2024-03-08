@@ -1,0 +1,14 @@
+22c22
+<   tag: 2.8.3
+---
+>   tag: 2.8.1
+27c27
+<   name: docker-registry
+---
+>   name: registry
+67,68c67,68
+<   enabled: true
+<   size: 5Gi
+---
+>   enabled: false
+>   size: 10Gi
