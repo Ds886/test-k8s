@@ -1,0 +1,18 @@
+76c76
+<     DISABLE_API: false
+---
+>     DISABLE_API: true
+172c172
+<   type: NodePort
+---
+>   type: ClusterIP
+185,186c185,186
+<   targetPort: 
+<   nodePort: 30025
+---
+>   targetPort:
+>   nodePort:
+254c254
+<   enabled: true
+---
+>   enabled: false

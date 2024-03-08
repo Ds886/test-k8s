@@ -1,0 +1,24 @@
+#!/bin/sh
+set -eux
+
+CURR_ID=$(id -u)
+[ "${CURR_ID}" != "0" ] && echo err: must run as root && exit 1
+
+PATH_TEMP="$(mktemp -d)"
+
+HELM_BASE_URL=https://get.helm.sh/
+HELM_VER=3.14.2
+HELM_SHA="0885a501d586c1e949e9b113bf3fb3290b0bbf74db9444a1d8c2723a143006a5"
+HELM_TARGET_FILE="helm-v${HELM_VER}-linux-amd64.tar.gz"
+HELM_FULL_URL="${HELM_BASE_URL}${HELM_TARGET_FILE}"
+
+curl -sfLo "${PATH_TEMP}/${HELM_TARGET_FILE}" "${HELM_FULL_URL}"
+
+
+CURR_DL_SUM=$(sha256sum "${PATH_TEMP}/${HELM_TARGET_FILE}"| cut -f1 -d\ )
+[ "${CURR_DL_SUM}" != "${HELM_SHA}" ] && echo err: download corrupted  && exit 1
+
+tar -C "/usr/local/bin" -xzf "${PATH_TEMP}/${HELM_TARGET_FILE}" "linux-amd64/helm"
+mv /usr/local/bin/linux-amd64/helm /usr/local/bin
+rm -rf /usr/local/bin/linux-amd64
+rm -rf "${PATH_TEMP}"
