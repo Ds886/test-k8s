@@ -23,7 +23,6 @@ jobs:
         run: |
           pwd
           ls
-          cd java-hello-service
           ./gradlew  clean build
       - uses: actions/upload-artifact@v4
         with:
@@ -56,7 +55,6 @@ jobs:
 
       - name: Build with Gradle
         run: |
-          cd java-hello-service
           ./gradlew  test
 
   package_tar:
@@ -82,7 +80,6 @@ jobs:
 
       - name: package tar
         run: |
-          cd java-hello-service
           ./gradlew  clean build distTar
           mv app/build/distributions/app.tar app/build/distributions/helloService.tar
 
@@ -116,7 +113,6 @@ jobs:
 
       - name: package jib image
         run: |
-          cd java-hello-service
           ./gradlew  clean build jibBuildTar
           mv app/build/jib-image.tar app/build/helloServiceDocker.tar
 
