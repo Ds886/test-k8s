@@ -11,5 +11,5 @@ spec:
     kind: Builder
   source:
     git:
-      url: https://github.com/spring-projects/spring-petclinic
-      revision: 3be289517d320a47bb8f359acc1d1daf0829ed0b
+      url: https://github.com/Ds886/test-k8s.git
+      revision: f0921ba4d689d3c7524208a674555a3d99ada10d
