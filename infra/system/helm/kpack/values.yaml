@@ -36,8 +36,8 @@ builder:
   tag: "ghcr.io/ds886/k8s-test"
   groups:
     - "paketo-buildpacks/java"
-    # - "paketo-buildpacks/gradle"
-    # - "paketobuildpacks/builder-jammy-base"
+    - "paketo-buildpacks/nodejs"
+#    - "paketo-buildpacks/gradle"
 
 podAnnotations: {}
 podLabels: {}
