@@ -50,7 +50,7 @@ ext {
 
 application {
     // Define the main class for the application.
-    mainClass = 'k8stest.App'
+    mainClass = 'java.hello.service.App'
 }
 
 tasks.named('test') {
