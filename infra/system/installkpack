@@ -7,8 +7,12 @@ export PATH="$PATH:/usr/local/bin"
 set +ue
 # Path
 PATH_TEMP="$(mktemp -d)"
+PATH_HELM_KPACK="helm/kpack"
 
 #BIN
+set +e
+HELM="$(command -v helm)"
+[ -z "${HELM}" ] && echo "Helm not found" && exit 1
 KUBECTL="$(which kubectl)"
 [ -z "${KUBECTL}" ] && echo err: no kubectl && exit 1
 set -e
@@ -16,6 +20,14 @@ set -e
 KPACK_VER="0.13.2"
 KP_VER="0.13.0"
 KP_HASH="52f0c927a1350f4f1bb281575ec246f406fb96aa69dc974ed10a2fe52c538158"
+KP_NS="default"
+KP_NAME="kpack"
+
+GHCR_EMAIL=InsertEmail
+GHCR_USERNAME=InsertUSERNAME
+GHCR_TOKEN=InsertTOKEN
+
+HELM_MODE="install"
 set -u
 
 
@@ -23,6 +35,8 @@ set +e
 "${KUBECTL}" get node
 KUBE_EXIT_CODE="$?"
 [ "$KUBE_EXIT_CODE" != 0 ] && echo err: no valid kubectl config && exit 1
+
+[ ! -e "${PATH_HELM_KPACK}" ] && echo "helm repo for kpack not found under ${PATH_HELM_KPACK}" && exit 1
 set -e
 
 # https://github.com/buildpacks-community/kpack/releases/download/v0.13.2/release-0.13.2.yaml
@@ -38,3 +52,24 @@ CURR_DL_SUM=$(sha256sum "/usr/local/bin/kp"| cut -f1 -d\ )
 kp version
 KP_EXIT_CODE="$?"
 [ "${KP_EXIT_CODE}" != 0 ] && echo "err: kp have a runtime issue" && exit 1
+
+set +e
+"${KUBECTL}" get secret ghcr-login-secret
+IS_SECRET="$?"
+set -e
+
+if [ "$IS_SECRET" != "1" ]
+then 
+  "${KUBECTL}" -n "${KP_NS}" create secret docker-registry ghcr-login-secret --docker-server=https://ghcr.io --docker-username="${GHCR_USERNAME}" --docker-password="${GHCR_TOKEN}" --docker-email="${GHCR_EMAIL}" || true
+fi
+set +e
+"${HELM}" status  -n "$KP_NS" "$KP_NAME"
+IS_HELM=$?
+set -e
+if [ "$IS_HELM" != "1" ]
+then
+  HELM_MODE="upgrade"
+fi
+
+set +e
+"${HELM}" ${HELM_MODE} -n "${KP_NS}" --wait "${KP_NAME}" "${PATH_HELM_KPACK}"

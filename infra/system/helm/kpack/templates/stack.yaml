@@ -1,0 +1,12 @@
+{{- if .Values.store.enabled -}}
+apiVersion: kpack.io/v1alpha2
+kind: ClusterStack
+metadata:
+  name: {{ .Values.stack.name }}
+spec:
+  id: "io.buildpacks.stacks.jammy"
+  buildImage:
+    image: "{{ .Values.stack.buildImage }}"
+  runImage:
+    image: "{{ .Values.stack.runImage }}"
+{{- end }}

@@ -41,6 +41,14 @@ else
 	firewall-cmd --reload
 fi
 
+# add install-path to sudo
+# We already check we are root on top
+# We first create temp folder for safety(race condition when writing to the same file)
+# shellcheck disable=2094
+sed 's,^Defaults secure_path="/usr/sbin:/usr/bin:/sbin:/bin$",Defaults secure_path="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin:/usr/local/sbin",g' "/etc/sudoers" > "${PATH_TEMP}/sudoers"
+cp /etc/sudoers /etc/sudoers.old
+mv "${PATH_TEMP}/sudoers" "/etc/sudoers"
+
 curl -sfLo "$PATH_K3S_SCRIPT" https://get.k3s.io
 chmod +x "${PATH_K3S_SCRIPT}"
 
@@ -48,11 +56,20 @@ CURR_DL_SUM=$(md5sum "${PATH_K3S_SCRIPT}"| cut -f1 -d\ )
 [ "${CURR_DL_SUM}" != "${K3S_SCRIPT_SHA}" ] && echo err: download corrupted  && exit 1
 "${PATH_K3S_SCRIPT}"
 
-chmod "${K8S_KUBECONF_MODE}" /etc/rancher/k3s/k3s.yaml
+echo "    --write-kubeconfig-mode=644 \\" | sudo tee -a /etc/systemd/system/k3s.service
+echo "" | sudo tee -a /etc/systemd/system/k3s.service
+systemctl daemon-reload
+systemctl restart k3s
 
 cat <<EOF > /etc/profile.d/k3s.sh
 	export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 EOF
+
+# sudo in  suse doesnt load profile
+mkdir -p /root/.kube
+rm -f /root/.kube/config
+ln -sf "/etc/rancher/k3s/k3s.yaml" "/root/.kube/config"
+
 
 echo "cleaning"
 rm -rf "$PATH_TEMP"

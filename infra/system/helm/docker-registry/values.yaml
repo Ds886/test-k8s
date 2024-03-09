@@ -25,12 +25,12 @@ image:
     # - name: docker
 service:
   name: docker-registry
-  type: ClusterIP
+  type: NodePort
   # sessionAffinity: None
   # sessionAffinityConfig: {}
   # clusterIP:
   port: 5000
-  # nodePort:
+  nodePort: 30050
   # loadBalancerIP:
   # loadBalancerSourceRanges:
   annotations: {}
@@ -47,10 +47,10 @@ ingress:
     # kubernetes.io/tls-acme: "true"
   labels: {}
   tls:
-    # Secrets must be manually created in the namespace.
-    # - secretName: chart-example-tls
-    #   hosts:
-    #     - chart-example.local
+    Secrets must be manually created in the namespace.
+    - secretName: chart-example-tls
+      hosts:
+        - chart-example.local
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -108,7 +108,7 @@ secrets:
 
 # https://docs.docker.com/registry/recipes/mirror/
 proxy:
-  enabled: false
+  enabled: true
   remoteurl: https://registry-1.docker.io
   username: ""
   password: ""

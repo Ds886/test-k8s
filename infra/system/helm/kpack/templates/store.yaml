@@ -1,0 +1,11 @@
+{{- if .Values.store.enabled -}}
+apiVersion: kpack.io/v1alpha2
+kind: ClusterStore
+metadata:
+  name: "{{ .Values.store.name }}"
+spec:
+  sources:
+{{- range .Values.store.sources }}
+  - image: "{{ . }}"
+{{- end }}
+{{- end }}

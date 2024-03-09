@@ -1,5 +1,5 @@
 # Ignore Gradle project-specific cache directory
-java-hello-service/.gradle
+.gradle
 
 # Ignore Gradle build output directory
-java-hello-service/app/build
+app/build

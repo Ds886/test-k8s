@@ -1,0 +1,30 @@
+{{- if .Values.builder.enabled -}}
+apiVersion: kpack.io/v1alpha2
+kind: Builder
+metadata:
+  name: {{ .Values.builder.name }}
+  namespace: default
+  labels:
+    {{- include "kpack.labels" . | nindent 4 }}
+  {{- with .Values.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  serviceAccountName: {{ include "kpack.serviceAccountName" . }}
+  tag: "{{ .Values.builder.tag}}"
+  stack:
+    name: "{{ .Values.stack.name }}"
+    kind: ClusterStack
+  store:
+    name: "{{ .Values.store.name }}"
+    kind: ClusterStore
+  order:
+{{- range .Values.builder.groups }}
+  - group:
+    - id: {{ . }}
+{{- end }}
+{{- end }}
+  # - group:
+  #   - id: paketo-buildpacks/gradle
+
