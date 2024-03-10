@@ -18,8 +18,6 @@ KUBECTL="$(which kubectl)"
 set -e
 
 KPACK_VER="0.13.2"
-KP_VER="0.13.0"
-KP_HASH="52f0c927a1350f4f1bb281575ec246f406fb96aa69dc974ed10a2fe52c538158"
 KP_NS="default"
 KP_NAME="kpack"
 
@@ -42,16 +40,8 @@ set -e
 # https://github.com/buildpacks-community/kpack/releases/download/v0.13.2/release-0.13.2.yaml
 curl -Lo "${PATH_TEMP}/kpack-release-${KPACK_VER}.yaml" "https://github.com/buildpacks-community/kpack/releases/download/v${KPACK_VER}/release-${KPACK_VER}.yaml"
 
-# https://github.com/buildpacks-community/kpack-cli/releases/download/v0.13.0/kp-linux-amd64-0.13.0
-curl -Lo "/usr/local/bin/kp" "https://github.com/buildpacks-community/kpack-cli/releases/download/v${KP_VER}/kp-linux-amd64-${KP_VER}"
-chmod +x "/usr/local/bin/kp"
-CURR_DL_SUM=$(sha256sum "/usr/local/bin/kp"| cut -f1 -d\ )
-[ "${CURR_DL_SUM}" != "${KP_HASH}" ] && echo err: download corrupted  && exit 1
 
 "${KUBECTL}" apply -f "${PATH_TEMP}/kpack-release-${KPACK_VER}.yaml"
-kp version
-KP_EXIT_CODE="$?"
-[ "${KP_EXIT_CODE}" != 0 ] && echo "err: kp have a runtime issue" && exit 1
 
 set +e
 "${KUBECTL}" get secret ghcr-login-secret
