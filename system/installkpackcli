@@ -1,0 +1,28 @@
+#!/bin/sh
+set -eux
+CURR_ID=$(id -u)
+[ "${CURR_ID}" != "0" ] && echo err: must run as root && exit 1
+
+set +u
+
+# BIN
+set +e
+CURL="$(command -v curl)"
+set -e
+[ -z "${CURL}" ] && echo "curl not found" && exit 1
+
+KP_VER="0.13.0"
+KP_HASH="52f0c927a1350f4f1bb281575ec246f406fb96aa69dc974ed10a2fe52c538158"
+set -u
+
+
+# https://github.com/buildpacks-community/kpack-cli/releases/download/v0.13.0/kp-linux-amd64-0.13.0
+curl -Lo "/usr/local/bin/kp" "https://github.com/buildpacks-community/kpack-cli/releases/download/v${KP_VER}/kp-linux-amd64-${KP_VER}"
+chmod +x "/usr/local/bin/kp"
+CURR_DL_SUM=$(sha256sum "/usr/local/bin/kp"| cut -f1 -d\ )
+[ "${CURR_DL_SUM}" != "${KP_HASH}" ] && rm -f "/usr/local/bin/kp" && echo "err: download corrupted"  && exit 1
+set +e
+kp version
+KP_EXIT_CODE="$?"
+set -e
+[ "${KP_EXIT_CODE}" != 0 ] && echo "err: kp have a runtime issue" && exit 1

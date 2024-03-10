@@ -25,6 +25,3 @@ spec:
     - id: {{ . }}
 {{- end }}
 {{- end }}
-  # - group:
-  #   - id: paketo-buildpacks/gradle
-
