@@ -1,0 +1,44 @@
+#!/bin/sh
+set -eux
+CURR_ID=$(id -u)
+[ "${CURR_ID}" != "0" ] && echo err: must run as root && exit 1
+
+set +e
+FLUX="$(command -v flux)"
+[ -z "${FLUX}" ] &&  ./system/installflux
+set -e
+
+set +e
+FLUX="$(command -v flux)"
+set -e
+[ -z "${FLUX}" ] && echo "tried to install flux but failed" && exit 1
+
+GH_TOKEN=InsertToken
+export GH_TOKEN
+GH_USER=InsertUser
+GH_REPO_FLUX=InserRepo
+
+FLUX_FEATURES="source-controller,kustomize-controller,helm-controller,notification-controller"
+FLUX_FEATURES_EXTRAS="image-reflector-controller,image-automation-controller"
+FLUX_NETWORK_POLICY="false"
+FLUX_CLUSTER_DOMAIN="localhost.internal"
+
+
+# Bootstrap
+# https://fluxcd.io/flux/installation/bootstrap/github/
+# shellcheck disable=2097
+"${FLUX}" bootstrap github \
+  --token-auth \
+  --owner="${GH_USER}" \
+  --repository="${GH_REPO_FLUX}" \
+  --branch=main \
+  --path=clusters/my-cluster \
+  --personal
+
+# Configuration
+# https://fluxcd.io/flux/installation/configuration/optional-components/
+"${FLUX}" bootstrap git \
+		--components "${FLUX_FEATURES}" \
+		--components-extra "${FLUX_FEATURES_EXTRAS}" \
+		--network-policy "${FLUX_NETWORK_POLICY}" \
+		--cluster-domain "${FLUX_CLUSTER_DOMAIN}"
