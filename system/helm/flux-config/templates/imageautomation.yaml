@@ -1,0 +1,21 @@
+{{- range .Values.repos }}
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta1
+kind: ImageUpdateAutomation
+metadata:
+  name: test
+  namespace: flux-system
+spec:
+  git:
+    checkout:
+      ref:
+        branch: "{{ .ref }}"
+    commit:
+      author:
+        email: "{{ .Values.general.email }}"
+        name: "{{ .Values.general.name}}"
+  interval: 1m0s
+  sourceRef:
+    kind: GitRepository
+    name: "{{ .name }}-gitrepo-{{ template fluxconfig.fullname }}"
+{{- end }}

@@ -1,0 +1,13 @@
+{{- range .Values.repos }}
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: "{{ .name }}-gitrepo-{{ template fluxconfig.fullname }}"
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  ref:
+    branch: "{{ .ref }}"
+  url:  "{{ .repo }}"
+{{- end }}
