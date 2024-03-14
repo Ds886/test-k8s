@@ -20,6 +20,7 @@ serviceAccount:
 general:
   email: "my-email@gmail.com"
   name: "Creds"
+  namespace: "flux-system"
 
 helm:
   repo: "http://chartmuseum.registry.svc.cluster.local:8080"
