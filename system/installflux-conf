@@ -1,7 +1,6 @@
 #!/bin/sh
 set -eux
 #PATH
-PATH_HELM_FLUX_CONF="helm/flux-config"
 
 #BIN
 set +e
@@ -9,13 +8,10 @@ HELM="$(command -v helm)"
 [ -z "${HELM}" ] && echo "Helm not found" && exit 1
 KUBECTL="$(which kubectl)"
 [ -z "${KUBECTL}" ] && echo err: no kubectl && exit 1
-# FLUX="$(command -v flux)"
-# [ -z "${FLUX}" ] && echo "fluxctl not found" && exit 1
+FLUX="$(command -v flux)"
+[ -z "${FLUX}" ] && echo "fluxctl not found" && exit 1
 set -e
 
-HELM_MODE="install"
-FLUX_CONF_NS="flux-system"
-FLUX_CONF_NAME="flux-config"
 set -u
 
 "${KUBECTL}" get node
@@ -23,47 +19,41 @@ KUBE_EXIT_CODE="$?"
 [ "$KUBE_EXIT_CODE" != 0 ] && echo err: no valid kubectl config && exit 1
 
 
-set +e
-"${HELM}" status  -n "$KP_NS" "$KP_NAME"
-IS_HELM=$?
-set -e
+"${FLUX}" create source helm local --url http://chartmuseum.registry.svc.cluster.local:8080
+# psuedo struct - adding a variable with the structure REMOTE_REPO_<NAME>_<ITEM> will be auto eval
+ export REMOTE_REPO_SIMPLEJAVA_NAME="simplejava" 
+ export REMOTE_REPO_SIMPLEJAVA_URL="https://github.com/Ds886/simplejava" 
+ export REMOTE_REPO_SIMPLEJAVA_BRANCH="main" 
+ export REMOTE_REPO_SIMPLEJAVA_INTERVAL="30s" 
+ export REMOTE_REPO_SIMPLEJAVA_REG="ghcr.io/ds886/simplejava" 
+ REPO_LIST=$(env |grep REMOTE_REPO|awk -F'_' '{print $3}'|sort| uniq| tr '\n' ' '| sed 's/ $//g')
+ for REPO_INSTANCE in ${REPO_LIST}
+ do
+   eval "_NAME=\${REMOTE_REPO_${REPO_INSTANCE}_NAME}"
+   eval "_URL=\${REMOTE_REPO_${REPO_INSTANCE}_URL}"
+   eval "_BRANCH=\${REMOTE_REPO_${REPO_INSTANCE}_BRANCH}"
+   eval "_INTERVAL=\${REMOTE_REPO_${REPO_INSTANCE}_INTERVAL}"
+   eval "_REG=\${REMOTE_REPO_${REPO_INSTANCE}_REG}"
+   "${FLUX}" create source git "${_NAME}" \
+     --url="${_URL}" \
+     --branch=main \
+     --interval="${_INTERVAL}"
 
-if [ "$IS_HELM" != "1" ]
-then
-  HELM_MODE="upgrade"
-fi
+   "${FLUX}" create image repository "${_NAME}" \
+     --image  "${_REG}" \
+     --secret-ref ghcr-login-secret
 
-"${HELM}" "${HELM_MODE}" -n "${FLUX_CONF_NS}" --wait "${FLUX_CONF_NAME}" "${PATH_HELM_FLUX_CONF}"
+   "${FLUX}" create image update "${_NAME}"\
+     --git-repo-ref="${_NAME}" \
+     --author-email "daniel.ashkenazi@gmail.com" \
+     --author-name "daniel" \
+     --checkout-branch "main"
 
-# kept as reference for a cli method
+   "${FLUX}" create source helm local --url http://chartmuseum.registry.svc.cluster.local:8080
 
-# "${FLUX}" create source helm local --url http://chartmuseum.registry.svc.cluster.local:8080
-#psuedo struct - adding a variable with the structure REMOTE_REPO_<NAME>_<ITEM> will be auto eval
-# export REMOTE_REPO_SIMPLEJAVA_NAME="simplejava" 
-# export REMOTE_REPO_SIMPLEJAVA_URL="https://github.com/Ds886/simplejava" 
-# export REMOTE_REPO_SIMPLEJAVA_BRANCH="main" 
-# export REMOTE_REPO_SIMPLEJAVA_INTERVAL="30s" 
-# export REMOTE_REPO_SIMPLEJAVA_REG="ghcr.io/ds886/k8s-test" 
-# REPO_LIST=$(env |grep REMOTE_REPO|awk -F'_' '{print $3}'|sort| uniq| tr '\n' ' '| sed 's/ $//g')
-# for REPO_INSTANCE in ${REPO_LIST}
-# do
-#   eval "_NAME=\${REMOTE_REPO_${REPO_INSTANCE}_NAME}"
-#   eval "_URL=\${REMOTE_REPO_${REPO_INSTANCE}_URL}"
-#   eval "_BRANCH=\${REMOTE_REPO_${REPO_INSTANCE}_BRANCH}"
-#   eval "_INTERVAL=\${REMOTE_REPO_${REPO_INSTANCE}_INTERVAL}"
-#   eval "_REG=\${REMOTE_REPO_${REPO_INSTANCE}_REG}"
-#   "${FLUX}" create source git "${_NAME}" \
-#     --url="${_URL}" \
-#     --branch="${_BRANCH}" \
-#     --interval="${_INTERVAL}"
 
-#   "${FLUX}" create image repository "${_NAME}" \
-#     --image  "${_REG}" \
-#     --secret-ref ghcr-login-secret
+   "${FLUX}" create helmrelease simplejava --source="GitRepository/${_NAME}" --chart="./helm"
 
-#   "${FLUX}" create image update "${_NAME}"\
-#     --git-repo-ref="${_NAME}" \
-#     --author-email "daniel.ashkenazi@gmail.com" \
-#     --author-name "daniel" \
-#     --checkout-branch "main"
-# done
+    # "${FLUX}" create kustomization kustom-simplejava --source="GitRepository/${_NAME}" --path="./kustomize"
+  
+ done

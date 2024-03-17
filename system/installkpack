@@ -1,7 +1,5 @@
 #!/bin/sh
 set -eux
-CURR_ID=$(id -u)
-[ "${CURR_ID}" != "0" ] && echo err: must run as root && exit 1
 
 export PATH="$PATH:/usr/local/bin"
 set +ue
